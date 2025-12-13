@@ -1,7 +1,10 @@
 from flask import Flask, jsonify, abort, request
 import requests, time
 from data_model import Package
-from connect_connector import SessionMaker
+from connect_connector import SessionMaker, Base, engine
+
+# Create the tables in the in-memory database
+Base.metadata.create_all(engine)
 
 app = Flask(__name__)
 
@@ -51,27 +54,29 @@ def acme_corp123_retrieve_package_by_product_id(product_id):
     :return: JSON response containing package information or 404 if not found.
     """
     session = SessionMaker()
-    package = session.query(Package).filter(Package.product_id == str(product_id)).first()
-    session.close()
+    try:
+        package = session.query(Package).filter(Package.product_id == str(product_id)).first()
 
-    if package:
-        return jsonify({
-            "height": package.height,
-            "width": package.width,
-            "depth": package.depth,
-            "weight": package.weight,
-            "special_handling_instructions": package.special_handling_instructions
-        })
-    else:
-        app_name, app_version = get_app_details()
-        abort(404, description={
-            "message": "The product_id was not found",
-            "timestamp": time.time(),
-            "app_name": app_name,
-            "version": app_version,
-            "called_method": "get_package",
-            "product_id": product_id
-        })
+        if package:
+            return jsonify({
+                "height": package.height,
+                "width": package.width,
+                "depth": package.depth,
+                "weight": package.weight,
+                "special_handling_instructions": package.special_handling_instructions
+            })
+        else:
+            app_name, app_version = get_app_details()
+            abort(404, description={
+                "message": "The product_id was not found",
+                "timestamp": time.time(),
+                "app_name": app_name,
+                "version": app_version,
+                "called_method": "get_package",
+                "product_id": product_id
+            })
+    finally:
+        session.close()
 
 # create a new package in the CloudSQL database
 # Endpoint that creates a new package in the database.
@@ -80,6 +85,8 @@ def acme_corp123_create_new_package():
     data = request.get_json()
     if not data:
         abort(400, description="Missing JSON data in request body")
+    
+    session = SessionMaker()
     try:
         product_id = data['product_id']
         height = data['height']
@@ -87,7 +94,7 @@ def acme_corp123_create_new_package():
         depth = data['depth']
         weight = data['weight']
         special_handling_instructions = data.get('special_handling_instructions')
-        session = SessionMaker()
+        
         new_package = Package(
             product_id=product_id,
             height=height,
@@ -104,6 +111,7 @@ def acme_corp123_create_new_package():
         abort(400, description=f"Missing required field: {e}")
     except ValueError as e:
         abort(400, description=f"Invalid data: {e}")
+    finally:
         session.close()
 
 # update an existing package in the CloudSQL database
@@ -121,32 +129,34 @@ def acme_corp123_update_existing_package_by_id(package_id):
         abort(400, description="Missing JSON data in request body")
 
     session = SessionMaker()
-    package = session.query(Package).filter(Package.id == package_id).first()
+    try:
+        package = session.query(Package).filter(Package.id == package_id).first()
 
-    if package:
-        try:
-            package.height = data.get('height', package.height)
-            package.width = data.get('width', package.width)
-            package.depth = data.get('depth', package.depth)
-            package.weight = data.get('weight', package.weight)
-            package.special_handling_instructions = data.get('special_handling_instructions', package.special_handling_instructions)
+        if package:
+            try:
+                package.height = data.get('height', package.height)
+                package.width = data.get('width', package.width)
+                package.depth = data.get('depth', package.depth)
+                package.weight = data.get('weight', package.weight)
+                package.special_handling_instructions = data.get('special_handling_instructions', package.special_handling_instructions)
 
-            session.commit()
+                session.commit()
 
-            return jsonify({
-                "height": package.height,
-                "width": package.width,
-                "depth": package.depth,
-                "weight": package.weight,
-                "special_handling_instructions": package.special_handling_instructions
-            })
-        except KeyError as e:
-            abort(400, description=f"Missing required field: {e}")
-        except ValueError as e:
-            abort(400, description=f"Invalid data: {e}")
-    else:
-        abort(404, description="The package_id was not found")
-    session.close()
+                return jsonify({
+                    "height": package.height,
+                    "width": package.width,
+                    "depth": package.depth,
+                    "weight": package.weight,
+                    "special_handling_instructions": package.special_handling_instructions
+                })
+            except KeyError as e:
+                abort(400, description=f"Missing required field: {e}")
+            except ValueError as e:
+                abort(400, description=f"Invalid data: {e}")
+        else:
+            abort(404, description="The package_id was not found")
+    finally:
+        session.close()
 
 
 # delete a package in the CloudSQL database
@@ -154,18 +164,17 @@ def acme_corp123_update_existing_package_by_id(package_id):
 @app.route('/packages/<int:package_id>', methods=['DELETE'])
 def acme_corp123_delete_package_by_id(package_id):
     session = SessionMaker()
-    package = session.query(Package).filter(Package.id == package_id).first()
-    session.close()
-
-    if package:
-        session = session_maker
-        session.delete(package)
-        session.commit()
-
-        return '', 204
-    else:
-        abort(404, description="The package_id was not found")
-    session.close()
+    try:
+        package = session.query(Package).filter(Package.id == package_id).first()
+        
+        if package:
+            session.delete(package)
+            session.commit()
+            return '', 204
+        else:
+            abort(404, description="The package_id was not found")
+    finally:
+        session.close()
 
 
 # Run the app
