@@ -65,7 +65,7 @@ The service handles the lifecycle of package data:
 
 1.  **Start the server**:
     ```bash
-    python3 backend_handlers.py
+    python3 main.py
     ```
     The application will start on `http://0.0.0.0:8000`.
 
