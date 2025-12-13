@@ -58,7 +58,7 @@ The service handles the lifecycle of package data:
 
 3.  **Install dependencies**:
     ```bash
-    pip install -r app/requirements.txt
+    pip install -r requirements.txt
     ```
 
 ### Running the Application
