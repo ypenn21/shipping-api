@@ -13,5 +13,3 @@ export GOOGLE_CLOUD_LOCATION=us-central1
 export VIRTUAL_ENV="$SHIPPING_PATH/.venv"
 export PATH="$SHIPPING_PATH/bin:$PATH"
 EOF
-# once you have the activate.sh created
-source activate.sh
