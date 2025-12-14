@@ -7,7 +7,7 @@
     "context7": {
       "httpUrl": "https://mcp.context7.com/mcp",
       "headers": {
-        "CONTEXT7_API_KEY": "key",
+        "CONTEXT7_API_KEY": "",
         "Accept": "application/json, text/event-stream"
       }
     },
@@ -15,7 +15,7 @@
       "type": "http",
       "url": "https://api.githubcopilot.com/mcp/",
       "headers": {
-        "Authorization": "Bearer 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"
+        "Authorization": ""
       }
     }
   },
