@@ -1,0 +1,78 @@
+{
+  "ide": {
+    "hasSeenNudge": true,
+    "enabled": true
+  },
+  "mcpServers": {
+    "nx-mcp": {
+      "command": "npx",
+      "args": [
+        "nx-mcp@latest"
+      ]
+    },
+    "context7": {
+      "httpUrl": "https://mcp.context7.com/mcp",
+      "headers": {
+        "CONTEXT7_API_KEY": "ctx7sk-9f05c611-3ee9-4a18-85b1-f84e605cd03c",
+        "Accept": "application/json, text/event-stream"
+      }
+    },
+    //"cloud-run": {
+    //   "command": "npx",
+    //   "args": [
+    //     "-y",
+    //     "@google-cloud/cloud-run-mcp"
+    //   ]
+    // },
+    "jira": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@aashari/mcp-server-atlassian-jira"
+      ],
+      "env": {
+        "ATLASSIAN_SITE_NAME": "google-team-coler8gf",
+        "ATLASSIAN_USER_EMAIL": "yannipeng@google.com",
+        "ATLASSIAN_API_TOKEN": "ATATT3xFfGF0y6XFksZwKQJyyvYxkxfTelB69SeoAlAP88UY_KJMJcYb9T5Az78oBgKEvpy1g0c02qvfuxp-U1P0aVzbh-C4hLrxD7Qi23SgM8JE8_Dy4ga8mDPBcc93eErShvuysBDlMPbAR55pw8wRAhkPeD9g5CuDYcXhYX99GLvuXv4wTFI=F85ACFBB"
+      }
+    },
+    "github": {
+      "command": "/opt/homebrew/Cellar/go/1.25.3/bin/go",
+      "args": [
+        "run",
+        "github.com/github/github-mcp-server/cmd/github-mcp-server@latest",
+        "stdio",
+        "--dynamic-toolsets"
+      ],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "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"
+      }
+    }
+    //"mcp-tool-box-db": {
+    //  "command": "npx",
+    //  "args": [
+    //    "mcp-remote",
+    //    "http://127.0.0.1:5000/mcp"
+    //  ],
+    //  "transportType": "streamable-http"
+    //}
+  },
+  "security": {
+    "auth": {
+      "selectedType": "vertex-ai"
+    }
+  },
+  "telemetry": {
+    "enabled": false,
+    "target": "gcp"
+  },
+  "ui": {
+    "theme": "Dracula"
+  },
+  "general": {
+    "previewFeatures": true
+  },
+  "experimental": {
+    "useModelRouter": true
+  }
+}
