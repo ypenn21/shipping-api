@@ -1,0 +1,331 @@
+openapi: 3.0.3
+info:
+  title: Shipping Service API
+  description: >-
+    Acme Corp Shipping Service — a RESTful microservice for managing package
+    information including dimensions, weight, and handling instructions.
+  version: "1.0.0"
+  contact:
+    name: GenAIs Team
+    email: genais@acme.corp
+
+servers:
+  - url: http://localhost:8000
+    description: Local development server
+
+paths:
+  /discovery:
+    get:
+      summary: Service discovery
+      description: Returns metadata about the shipping service.
+      operationId: getDiscovery
+      tags:
+        - Health & Discovery
+      responses:
+        "200":
+          description: Service metadata
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DiscoveryResponse"
+
+  /liveness:
+    get:
+      summary: Liveness probe
+      description: Indicates whether the service process is running.
+      operationId: getLiveness
+      tags:
+        - Health & Discovery
+      responses:
+        "200":
+          description: Service is live
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+
+  /readiness:
+    get:
+      summary: Readiness probe
+      description: Indicates whether the service is ready to accept traffic.
+      operationId: getReadiness
+      tags:
+        - Health & Discovery
+      responses:
+        "200":
+          description: Service is ready
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+
+  /packages:
+    post:
+      summary: Create a package
+      description: >-
+        Creates a new package record with the provided dimensions, weight,
+        and optional handling instructions.
+      operationId: createPackage
+      tags:
+        - Packages
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PackageCreate"
+      responses:
+        "201":
+          description: Package created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PackageCreatedResponse"
+        "400":
+          description: Missing required package fields
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /packages/{product_id}:
+    get:
+      summary: Get a package by product ID
+      description: Retrieves the details of a package identified by its product ID.
+      operationId: getPackage
+      tags:
+        - Packages
+      parameters:
+        - name: product_id
+          in: path
+          required: true
+          description: The product ID associated with the package
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Package details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PackageDetails"
+        "404":
+          description: Package not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /packages/{package_id}:
+    put:
+      summary: Update a package
+      description: >-
+        Updates an existing package identified by its internal package ID.
+        Supports partial updates — only the fields provided in the request
+        body will be modified.
+      operationId: updatePackage
+      tags:
+        - Packages
+      parameters:
+        - name: package_id
+          in: path
+          required: true
+          description: The internal auto-increment package ID
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PackageUpdate"
+      responses:
+        "200":
+          description: Package updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PackageDetails"
+        "404":
+          description: Package not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+    delete:
+      summary: Delete a package
+      description: Deletes a package identified by its internal package ID.
+      operationId: deletePackage
+      tags:
+        - Packages
+      parameters:
+        - name: package_id
+          in: path
+          required: true
+          description: The internal auto-increment package ID
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Package deleted successfully
+        "404":
+          description: Package not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+components:
+  schemas:
+    DiscoveryResponse:
+      type: object
+      properties:
+        name:
+          type: string
+          example: shipping
+        version:
+          type: string
+          example: "1.0"
+        owners:
+          type: array
+          items:
+            type: string
+          example:
+            - ameerabb
+            - lonestar
+        team:
+          type: string
+          example: genAIs
+        organization:
+          type: string
+          example: acme
+      required:
+        - name
+        - version
+        - owners
+        - team
+        - organization
+
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: live
+        code:
+          type: integer
+          example: 200
+        timestamp:
+          type: number
+          format: double
+          description: Unix epoch timestamp
+          example: 1710000000.123456
+      required:
+        - status
+        - code
+        - timestamp
+
+    PackageCreate:
+      type: object
+      description: Request body for creating a new package.
+      properties:
+        product_id:
+          type: string
+          description: External product identifier
+          example: "100"
+        height:
+          type: number
+          format: float
+          example: 10.0
+        width:
+          type: number
+          format: float
+          example: 10.0
+        depth:
+          type: number
+          format: float
+          example: 10.0
+        weight:
+          type: number
+          format: float
+          example: 5.0
+        special_handling_instructions:
+          type: string
+          description: Optional handling instructions
+          example: Fragile — handle with care
+      required:
+        - product_id
+        - height
+        - width
+        - depth
+        - weight
+
+    PackageCreatedResponse:
+      type: object
+      properties:
+        package_id:
+          type: integer
+          description: The auto-generated internal package ID
+          example: 1
+
+    PackageDetails:
+      type: object
+      description: Full package details returned by GET and PUT endpoints.
+      properties:
+        product_id:
+          type: string
+          example: "100"
+        height:
+          type: number
+          format: float
+          example: 10.0
+        width:
+          type: number
+          format: float
+          example: 10.0
+        depth:
+          type: number
+          format: float
+          example: 10.0
+        weight:
+          type: number
+          format: float
+          example: 5.0
+        special_handling_instructions:
+          type: string
+          example: Fragile — handle with care
+
+    PackageUpdate:
+      type: object
+      description: >-
+        Request body for updating a package. All fields are optional —
+        only provided fields will be updated.
+      properties:
+        height:
+          type: number
+          format: float
+          example: 15.0
+        width:
+          type: number
+          format: float
+          example: 15.0
+        depth:
+          type: number
+          format: float
+          example: 15.0
+        weight:
+          type: number
+          format: float
+          example: 10.0
+        special_handling_instructions:
+          type: string
+          example: Updated Instructions
+
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Human-readable error description
+          example: Missing required package fields

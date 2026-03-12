@@ -89,45 +89,5 @@ def get_package(product_id):
     finally:
         session.close()
 
-@app.route('/packages/<int:package_id>', methods=['PUT'])
-def update_package(package_id):
-    data = request.get_json()
-    session = SessionMaker()
-    try:
-        package = session.query(Package).filter(Package.id == package_id).first()
-        if package:
-            package.height = data.get('height', package.height)
-            package.width = data.get('width', package.width)
-            package.depth = data.get('depth', package.depth)
-            package.weight = data.get('weight', package.weight)
-            package.special_handling_instructions = data.get('special_handling_instructions', package.special_handling_instructions)
-            
-            session.commit()
-            
-            updated_package = {
-                "height": package.height,
-                "width": package.width,
-                "depth": package.depth,
-                "weight": package.weight,
-                "special_handling_instructions": package.special_handling_instructions
-            }
-            return jsonify(updated_package)
-        abort(404, description=f"Package with package_id {package_id} not found")
-    finally:
-        session.close()
-
-@app.route('/packages/<int:package_id>', methods=['DELETE'])
-def delete_package(package_id):
-    session = SessionMaker()
-    try:
-        package = session.query(Package).filter(Package.id == package_id).first()
-        if package:
-            session.delete(package)
-            session.commit()
-            return "", 204
-        abort(404, description=f"Package with package_id {package_id} not found")
-    finally:
-        session.close()
-
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8000, debug=True)
