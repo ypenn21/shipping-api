@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String, Float
-from connect_connector import Base
+from db_connector import Base
 
 class Package(Base):
     __tablename__ = 'packages'

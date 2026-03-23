@@ -1,7 +1,7 @@
 from flask import Flask, jsonify, request, abort
 import time
 
-from connect_connector import SessionMaker, Base, engine
+from db_connector import SessionMaker, Base, engine
 from data_model import Package
 
 # Initialize Flask app
