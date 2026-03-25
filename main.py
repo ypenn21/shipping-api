@@ -43,20 +43,20 @@ def readiness():
 @app.route('/packages', methods=['POST'])
 def create_package():
     data = request.get_json()
-    product_id = data.get('product_id')
+    package_id_val = data.get('package_id')
     height = data.get('height')
     width = data.get('width')
     depth = data.get('depth')
     weight = data.get('weight')
     special_handling_instructions = data.get('special_handling_instructions')
 
-    if not all([product_id, height, width, depth, weight]):
+    if not all([package_id_val, height, width, depth, weight]):
         abort(400, description="Missing required package fields")
 
     session = SessionMaker()
     try:
         new_package = Package(
-            product_id=product_id,
+            package_id=package_id_val,
             height=height,
             width=width,
             depth=depth,
@@ -65,19 +65,19 @@ def create_package():
         )
         session.add(new_package)
         session.commit()
-        package_id = new_package.id
-        return jsonify({"package_id": package_id}), 201
+        db_id = new_package.id
+        return jsonify({"db_id": db_id, "package_id": package_id_val}), 201
     finally:
         session.close()
 
-@app.route('/packages/<int:product_id>', methods=['GET'])
-def get_package(product_id):
+@app.route('/packages/<int:package_id>', methods=['GET'])
+def get_package(package_id):
     session = SessionMaker()
     try:
-        package = session.query(Package).filter(Package.product_id == str(product_id)).first()
+        package = session.query(Package).filter(Package.package_id == str(package_id)).first()
         if package:
             package_details = {
-                "product_id": package.product_id,
+                "package_id": package.package_id,
                 "height": package.height,
                 "width": package.width,
                 "depth": package.depth,
@@ -85,7 +85,7 @@ def get_package(product_id):
                 "special_handling_instructions": package.special_handling_instructions
             }
             return jsonify(package_details)
-        abort(404, description=f"Package with product_id {product_id} not found")
+        abort(404, description=f"Package with package_id {package_id} not found")
     finally:
         session.close()
 

@@ -4,7 +4,7 @@ from db_connector import Base
 class Package(Base):
     __tablename__ = 'packages'
     id = Column(Integer, primary_key=True, autoincrement=True)
-    product_id = Column(String, nullable=False)
+    package_id = Column(String, nullable=False)
     height = Column(Float)
     width = Column(Float)
     depth = Column(Float)
